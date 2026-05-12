@@ -15,6 +15,7 @@ class ECG_Pipeline:
         self.peaks = None
         self.bpm = 0
         self.sdnn = 0
+        self.pvc_count = 0
         self.run_batch = run_batch
 
 
@@ -113,22 +114,22 @@ class ECG_Pipeline:
         # Calculate SDNN on the clean normal beats
         self.sdnn = np.std(normal_intervals)
         
-        # Count how many anomalies we caught for the terminal output
-        pvcs_removed = len(intervals_ms) - len(normal_intervals)
+        # Count how many anomalies we caught for the output
+        self.pvc_count = len(intervals_ms) - len(normal_intervals)
         
         print(f"Calculated HRV (SDNN): {round(self.sdnn, 2)} ms")
-        if pvcs_removed > 0:
-            print(f"   -> [ALERT] PVC Filter active: Removed {pvcs_removed} abnormal intervals.")
+        if self.pvc_count > 0:
+            print(f"   -> [ALERT] PVC Filter active: Removed {self.pvc_count} abnormal intervals.")
 
 
-    def plot_results(self): 
+    def plot_results(self, return_fig=False): 
 
         """
         Generates a comparative matplotlib visualization of the raw noisy signal 
         overlaid with the filtered signal and detected R-peak markers.
         """
         
-        plt.figure(figsize=(12, 6))
+        fig = plt.figure(figsize=(12, 6))
         
         # Plot the raw, messy data in the background (faded out)
         plt.plot(self.raw_ecg, label="Raw Noisy Data", color="gray", alpha=0.5)
@@ -146,11 +147,13 @@ class ECG_Pipeline:
         plt.grid(True)
         
         if self.run_batch == True:
-            # If batching, save to folder
+            # If running the loop, save it to the folder
             plt.savefig(f"graphs/patient_{self.patient_number}_report.png", bbox_inches='tight')
             plt.close()
+        elif return_fig == True:
+            return fig 
         else:
-            # If single run, open it on screen
+            # If running standalone, pop it open on the screen
             plt.show()
         
 
@@ -222,7 +225,7 @@ class Advanced_ECG_Pipeline(ECG_Pipeline): # Subclass for experimental, from-scr
         self.magnitudes = np.abs(fft_result)[:N//2]
 
 
-    def plot_results(self):
+    def plot_results(self, return_fig=False):
 
         """
         Overrides the parent class plotter to generate a two-pane visualization:
@@ -259,10 +262,8 @@ class Advanced_ECG_Pipeline(ECG_Pipeline): # Subclass for experimental, from-scr
 
         plt.tight_layout()
         
-        # The Master Switch logic stays the exact same
-        if self.run_batch == True:
-            plt.savefig(f"graphs/patient_{self.patient_number}_advanced_report.png", bbox_inches='tight')
-            plt.close()
+        if return_fig == True:
+            return fig
         else:
             plt.show()
 
@@ -274,13 +275,13 @@ if __name__ == "__main__":
     # ==========================================
 
     # Select 100-series or 200-series patient
-    patient_number = 217      
+    patient_number = 208      
 
     # True: Use custom FIR/FFT | False: Use MVP pipeline      
-    test_advanced = True    
+    test_advanced = False    
 
     # True: Force 60Hz powerline hum into the signal
-    inject_60hz_noise = True 
+    inject_60hz_noise = False 
 
     # True: Run full directory | False: Run single patient 
     run_batch = False    
