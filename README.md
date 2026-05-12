@@ -4,6 +4,8 @@ A pure-software Digital Signal Processing (DSP) pipeline written in Python to cl
 
 I built this project to deeply understand the underlying math behind pre-built libraries like SciPy, translating theoretical continuous mathematics into discrete Python algorithms.
 
+![Streamlit UI Dashboard](UI_standard_100.png?v=2)
+
 ## Key Features
 
 * **Multi-Layer Anomaly Defense:** Built a four-stage filtering system (Frequency, Polarity, Amplitude, and Temporal). It dynamically scrubs baseline wander, automatically flips inverted hospital cables, and uses a statistical median time-filter to catch and drop PVCs from the final HRV metric.
@@ -21,7 +23,13 @@ I built this project to deeply understand the underlying math behind pre-built l
 *The pipeline catching and removing irregular PVCs using boolean masking, protecting the final SDNN calculation.*
 
 ## How to Run Locally
+
+The DSP engine is wrapped in a decoupled Streamlit frontend for interactive data visualization, but can also be run as a standalone batch script.
+
 1. Clone the repository.
-2. Install the required dependencies: `numpy`, `scipy`, `pandas`, and `matplotlib`.
-3. The dataset requires the `wfdb` library to read the MIT-BIH tapes.
-4. Run `main.py`. You can toggle between a single-patient deep dive or a full 48-patient batch run using the Master Control variables at the top of the file.
+2. Install the required dependencies: 
+   `pip install -r requirements.txt`
+3. **To boot the interactive dashboard:**
+   `python -m streamlit run app.py`
+4. **To run a headless batch analysis:**
+   Run `main.py`. You can toggle between a single-patient analysis or a full 48-patient batch run using the Master Control variables at the top of the file.
